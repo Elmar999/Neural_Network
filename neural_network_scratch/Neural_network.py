@@ -105,6 +105,7 @@ class Neural:
         H1 = np.matmul(X , self.W1)
         # A1 = nlb.NNLib.sigmoid(H1)
         return nlb.NNLib.sigmoid(H1)
+        
 
 
 
@@ -115,11 +116,16 @@ class Neural:
         dH1_dW = X
 
         # print(dL_dy.shape , dy_dH1.shape , dH1_dW.shape)
-        dW = np.matmul(dy_dH1 * dL_dy , dH1_dW)
+        dW = np.matmul(dy_dH1 * dL_dy.T , dH1_dW)
 
         return dW
 
 
+    def error(y_hat , y ):
+        y_hat = np.reshape(y_hat , (3 , 1))
+        y = np.reshape(y , (3 , 1))
+        error = np.mean((y_hat - y)**2)
+        return error
 
 
     def train_epoch(self , n_epoch):
@@ -129,35 +135,21 @@ class Neural:
             # np.seterr(all='raise')
             total_error = 0.
             for i in range(self.batch_size):
+                # ---------------   FEED FORWARD -------------
+                
                 X = self.X_train[i]
                 X = np.reshape(X , (1,  4))
 
-                # H1 = np.matmul(X , self.W1)
-
-
-                # print(X.shape , self.W1.shape)
-                # y_hat = nlb.NNLib.sigmoid(H1)
                 y_hat = self.feed_forward(X)
-                y = self.Y_train[i]
-               
-                # print(y_hat.shape , )
-                y_hat = np.reshape(y_hat , (3 , 1))
-                y = np.reshape(y , (3 , 1))
-                # error = nlb.NNLib.crossEntropy(y_hat , y)
-                error = np.mean((y_hat - y)**2)
-                total_error += error
-
-
-                # ----------BACK PROPOGATION -------------
                 
-                # dL_dy = 2 * (y_hat - y)
-                # # dy_dH1 = dL_dy
-                # dy_dH1 = nlb.NNLib.sigmoid(y_hat, True).reshape(3, 1)
-                # dH1_dW = X
+                
+                # --------------- BACKPROPOGATION
 
 
-                # print(dL_dy.shape , dy_dH1.shape , dH1_dW.shape)
-                # dW = np.matmul(dy_dH1 * dL_dy , dH1_dW)
+                y = self.Y_train[i]
+                error = np.mean((y_hat - y)**2)
+
+                total_error += error
 
                 dW = self.back_prop(y_hat , y , X)
 
